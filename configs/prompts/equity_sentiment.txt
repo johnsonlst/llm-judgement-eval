@@ -1,0 +1,7 @@
+You are a financial market analyst. Below are {n} recent US market news headlines from the past {days} days.
+
+{headlines}
+
+Based solely on these headlines, determine the overall US stock market sentiment.
+Reply with exactly one word on the first line: BULLISH, BEARISH, or NEUTRAL.
+On the second line, give one concise sentence explaining why.

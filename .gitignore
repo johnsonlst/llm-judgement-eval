@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# downloaded / generated data
+cache/
+out/
+*.jsonl
+!examples/**/*.sample.jsonl
+!findings/**/*.jsonl

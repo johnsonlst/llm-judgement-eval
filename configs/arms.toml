@@ -1,0 +1,32 @@
+# Experimental arms for lje.replay / lje.evals.consistency.
+# Each arm = one way of asking the same question. Compare arms to learn what
+# the judgement actually depends on (model, prompt order, provider overhead).
+
+[run]
+labels  = ["bullish", "bearish", "neutral"]
+workers = 4
+timeout = 120
+
+[arms.opus]                     # baseline; reps=2 measures repeat stability
+model = "claude-opus-5-5"
+mode  = "trim"
+reps  = 2
+
+[arms.opus_shuffle]             # same model, headline order shuffled (seeded)
+model     = "claude-opus-5-5"
+mode      = "trim"
+transform = "shuffle"
+
+[arms.sonnet]
+model = "claude-sonnet-5-5"
+mode  = "trim"
+
+[arms.haiku]
+model = "claude-haiku-5-5"
+mode  = "trim"
+
+# Uncomment to measure what the default Claude Code context does to the
+# verdict (and the bill): ~26K input tokens per call instead of ~3K.
+# [arms.opus_full]
+# model = "claude-opus-5-5"
+# mode  = "full"
