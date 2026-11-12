@@ -125,3 +125,44 @@ def test_gdelt_slots_align():
     s = datetime(2026, 11, 1, 1, 30, tzinfo=timezone.utc)
     e = datetime(2026, 11, 1, 9, 0, tzinfo=timezone.utc)
     assert [t.hour for t in gdelt.slots(s, e, 2)] == [2, 4, 6, 8]
+
+
+# --- outcome -----------------------------------------------------------------
+from lje.evals.outcome import report as outcome_report  # noqa: E402
+from lje.sources.prices import attach, session_returns  # noqa: E402
+from lje.stats import block_bootstrap_ci  # noqa: E402
+
+
+BARS = [("2026-01-02", 100, 101), ("2026-01-05", 101, 99), ("2026-01-06", 99, 102),
+        ("2026-01-07", 102, 103), ("2026-01-08", 103, 104), ("2026-01-09", 104, 100)]
+
+
+def test_session_returns_from_open():
+    r = session_returns(BARS, "2026-01-06")
+    assert r["r_close"] == pytest.approx(102 / 99 - 1)
+    assert r["r_1d"] == pytest.approx(103 / 99 - 1)
+    assert r["r_5d"] is None                                  # not enough bars yet
+    assert r["prev_1d"] == pytest.approx(99 / 101 - 1)      # known before the open
+    assert session_returns(BARS, "2026-01-03") is None       # not a trading day
+
+
+def test_attach_one_row_per_symbol():
+    labels = [{"date": "2026-01-06", "kind": "equity", "label": "bullish"}]
+    rows = attach(labels, {"QQQ": BARS, "SPY": BARS}, {"equity": ["QQQ", "SPY"]})
+    assert [r["symbol"] for r in rows] == ["QQQ", "SPY"]
+
+
+def test_outcome_signs_and_baselines():
+    rows = [{"kind": "k", "symbol": "X", "label": l, "r_close": r, "prev_1d": 0.01}
+            for l, r in [("bullish", 0.01), ("bearish", -0.02), ("neutral", 0.05)]]
+    _, out = outcome_report(rows, ["r_close"], n_boot=200)
+    lab = out["k/X"]["r_close/label"]
+    assert lab["n"] == 2 and lab["signed_bp"] == pytest.approx(150)   # (+1% + 2%) / 2
+    assert lab["hit"] == 1.0
+    assert out["k/X"]["r_close/always_long"]["perm_p"] is None        # constant signal
+
+
+def test_block_bootstrap_resamples_groups():
+    lo, hi = block_bootstrap_ci([1.0, 1.0, 3.0, 3.0], ["a", "a", "b", "b"], n_boot=500)
+    assert 1.0 <= lo <= hi <= 3.0
+    assert block_bootstrap_ci([], []) != block_bootstrap_ci([], [])   # nan != nan

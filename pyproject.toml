@@ -15,6 +15,8 @@ dev = ["pytest>=8"]
 lje-replay = "lje.replay:main"
 lje-consistency = "lje.evals.consistency:main"
 lje-gdelt = "lje.sources.gdelt:main"
+lje-outcome = "lje.evals.outcome:main"
+lje-prices = "lje.sources.prices:main"
 
 [build-system]
 requires = ["setuptools>=68"]

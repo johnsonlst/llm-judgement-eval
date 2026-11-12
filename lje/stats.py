@@ -52,3 +52,27 @@ def bootstrap_ci(values: list[float], n_boot: int = 10000, alpha: float = 0.05,
     n = len(values)
     means = sorted(sum(rng.choice(values) for _ in range(n)) / n for _ in range(n_boot))
     return means[int(alpha / 2 * n_boot)], means[int((1 - alpha / 2) * n_boot) - 1]
+
+
+def block_bootstrap_ci(values: list[float], groups: list, n_boot: int = 10000,
+                       alpha: float = 0.05, seed: int = 0) -> tuple[float, float]:
+    """Bootstrap CI for the mean, resampling whole groups (e.g. days).
+
+    Use when several observations share a group and are not independent,
+    such as many calls on the same trading day.
+    """
+    if not values:
+        return (float("nan"), float("nan"))
+    sums, cnts = {}, {}
+    for v, g in zip(values, groups):
+        sums[g] = sums.get(g, 0.0) + v
+        cnts[g] = cnts.get(g, 0) + 1
+    keys = list(sums)
+    rng = random.Random(seed)
+    k = len(keys)
+    means = []
+    for _ in range(n_boot):
+        pick = [keys[rng.randrange(k)] for _ in range(k)]
+        means.append(sum(sums[g] for g in pick) / sum(cnts[g] for g in pick))
+    means.sort()
+    return means[int(alpha / 2 * n_boot)], means[int((1 - alpha / 2) * n_boot) - 1]
