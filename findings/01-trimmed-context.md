@@ -31,6 +31,7 @@ Each of the two setups was replayed on the exact first-of-session prompts the bo
 - Trimming cuts the overhead by about 40x on a tiny prompt, and real prompts are about 9x cheaper end to end (~3K vs ~28K input tokens).
 - The trimmed verdict matches the live one 92-95% of the time. Re-asking the *full* setup agreed 100% of the time, on a smaller sample whose intervals overlap the trimmed ones. With n=20 per market, I can't tell the difference between "trim changes nothing" and "trim changes about 1 verdict in 20".
 - **Decision:** the production bot switched to trimmed calls on 2026-11-12 and can switch back with one flag. Future outcome data will tell whether anything moved.
+- **Two weeks live (2026-11-12 to 11-25 US sessions):** 140/140 trimmed calls parsed, 0 errors, median latency 4.0s (full mode before: 282/282, 7.4s). The label mix moved more bearish: equity BEARISH 80% (56/70) vs 63% (89/141) before; gold 97% vs 87%. The market fell over the same weeks, and live data alone can't separate a market shift from an instrument shift. The replay above (same prompts, 92-95% agreement) points to the market.
 
 ## Caveats
 
